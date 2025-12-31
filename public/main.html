@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Faculty Leave Management</title>
+    <link rel="stylesheet" href="/leave_mgmt/styles.css" />
+    <script src="/leave_mgmt/script.js" defer></script>
+  </head>
+
+  <body>
+    <header class="header">
+      <div class="headLeft">
+    <script src="/leave_mgmt/tabClient.js"></script>
+        <img src="./assets/Img/logo.png" alt="" srcset="" />
+        <div class="dropdown">
+          <button class="dropdown-toggle">All Users &#x25BC;</button>
+          <ul class="dropdown-menu"></ul>
+        </div>
+        <div class="form-container"></div>
+      </div>
+
+      <div class="headData">
+        <h1>Guru Nanak Dev Engineering College, Ludhiana</h1>
+        <h2 class="heading--department-name">Department</h2>
+        <h3 class="heading--role-name">Faculty Leave Management</h3>
+        <div id="scope-switcher" class="scope-switcher hidden">
+          <label for="scope-type-filter">View:</label>
+          <select id="scope-type-filter">
+            <option value="department">Department</option>
+            <option value="hostel">Hostel</option>
+          </select>
+          <select id="scope-value-filter">
+            <option value="" disabled selected>Select scope</option>
+          </select>
+          <button id="scope-apply-btn">Load</button>
+        </div>
+      </div>
+      <div class="headRight">
+        <button class="btn--todays-report">Today's Report</button>
+        <button id="logout-button">Logout</button>
+      </div>
+    </header>
+    <main>
+      <section id="data" class="scope-dashboard">
+        <div id="scope-empty-state" class="scope-empty hidden">
+          <p>Select a department or hostel to load records.</p>
+        </div>
+        <table class="table-container">
+          <thead>
+            <tr>
+              <th>Sr No</th>
+              <th>Faculty Name</th>
+              <th>Designation</th>
+              <th>Short Leaves</th>
+              <th>Half Day Leaves</th>
+              <th>Full Day Leaves</th>
+              <th>Academic Leaves</th>
+              <th>Medical/Maternity Leaves</th>
+              <th>Compensatory Leaves</th>
+              <th>Earned Leaves</th>
+              <th>Without Payment Leaves</th>
+              <th>Remaining Leaves</th>
+              <th>Total Leaves</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="leave-table"></tbody>
+        </table>
+      </section>
+
+      <!-- Loading spinner -->
+      <div id="loading-spinner" class="spinner">Loading...</div>
+
+      <!-- Messages for errors and success -->
+      <div id="error-message" class="message error"></div>
+
+      <div id="success-message" class="message success"></div>
+
+      <!-- PI Chat Modal -->
+      <div class="modal" id="piChatModal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title">PI Chat Summary</h3>
+            <button class="close-modal" onclick="closePiChatModal()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div id="piChatControls" style="margin-bottom:12px; display:flex; gap:8px; align-items:center;">
+              <label for="piScopeType" style="margin-right:6px;">Scope:</label>
+              <select id="piScopeType" class="form-control">
+                <option value="department">Department</option>
+                <option value="hostel">Hostel</option>
+              </select>
+              <select id="piScopeValue" class="form-control" style="min-width:160px;"></select>
+              <button id="piLoadBtn" class="btn btn-primary">Load</button>
+            </div>
+
+            <div id="piSummaryArea">
+              <div id="piSummaryHeader" style="margin-bottom:12px;"></div>
+              <div id="piSummaryStats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px;"></div>
+              <div id="piSummaryByCategory"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Faculty addition section -->
+      <section class="add-delete-generate">
+        <div id="add_faculty">
+          <div class="addFacultyData">
+            <div id="userInputData">
+              <input
+                type="text"
+                id="new-faculty-name"
+                placeholder="Enter Faculty Name"
+              />
+              <select id="new-faculty-designation">
+                <option value="" disabled selected>Select Designation</option>
+                <option value="Professor">Professor</option>
+                <option value="Associate Professor">Associate Professor</option>
+                <option value="Assistant Professor">Assistant Professor</option>
+                <option value="Clerk">Clerk</option>
+                <option value="Lab Technician">Lab Technician</option>
+                <option value="Lab Attendant">Lab Attendant</option>
+                <option value="Attendant">Attendant</option>
+              </select>
+                <div id="per-type-inputs" style="display: grid; grid-template-columns: repeat(2, 1fr); gap:8px;">
+                <input type="number" id="new-short-granted" placeholder="Short (count)" min="0" />
+                <input type="number" id="new-half-granted" placeholder="Half-day (count)" min="0" />
+                <input type="number" id="new-casual-granted" placeholder="Full Day" min="0" />
+                <input type="number" id="new-medical-granted" placeholder="Medical" min="0" />
+                <input type="number" id="new-without-granted" placeholder="Without Payment" min="0" />
+                <input type="number" id="new-compensatory-granted" placeholder="Compensatory" min="0" />
+                <input type="number" id="new-earned-granted" placeholder="Earned" min="0" />
+                <input type="number" id="new-academic-granted" placeholder="Academic (excluded)" min="0" />
+              </div>
+              <div style="margin-top:6px;">Total Leaves (days): <span id="new-total-leaves">0.00</span></div>
+            </div>
+            <button id="add-faculty-button">Add Faculty</button>
+          </div>
+          <div class="facultySearch-delete search-container">
+            <!-- <input
+              type="text"
+              id="faculty-search"
+              placeholder="Search faculty (e.g., John Doe (Professor))"
+            /> -->
+
+            <input
+              type="text"
+              id="searchInput"
+              class="search-input"
+              placeholder="Search faculty (e.g., John Doe (Professor))"
+            />
+            <div id="suggestionsBox" class="suggestions"></div>
+            <button id="delete-faculty-btn" disabled>Delete</button>
+          </div>
+        </div>
+
+        <div class="generateReport">
+          <div class="date">
+            <p class="select-range">Select Range :</p>
+            <label class="insidelabel">From: </label>
+            <input type="date" class="addleave-date from-date" />
+            <label class="insidelabel">To:</label>
+            <input type="date" class="addleave-date to-date" />
+          </div>
+          <button class="generate-report">Generate Report</button>
+        </div>
+      </section>
+      <ul id="suggestions-list"></ul>
+
+      <section id="establishment-panel" class="admin-panel hidden">
+        <h2>Establishment Controls</h2>
+        <div class="admin-grid">
+          <div class="panel-card">
+            <h3>Departments</h3>
+            <form id="department-form" class="inline-form">
+              <input
+                type="text"
+                id="dept-name-input"
+                placeholder="New Department Name"
+              />
+              <button type="submit">Add</button>
+            </form>
+            <ul id="department-list" class="simple-list"></ul>
+          </div>
+          <div class="panel-card">
+            <h3>Hostels</h3>
+            <form id="hostel-form" class="inline-form">
+              <input
+                type="text"
+                id="hostel-name-input"
+                placeholder="New Hostel Name"
+              />
+              <button type="submit">Add</button>
+            </form>
+            <ul id="hostel-list" class="simple-list"></ul>
+          </div>
+          <div class="panel-card">
+            <h3>Add Faculty/Staff</h3>
+            <form id="global-faculty-form" class="stacked-form">
+              <select id="global-scope-type">
+                <option value="department">Department</option>
+                <option value="hostel">Hostel</option>
+              </select>
+              <select id="global-scope-value"></select>
+              <input
+                type="text"
+                id="global-faculty-name"
+                placeholder="Full Name"
+              />
+              <input
+                type="text"
+                id="global-faculty-designation"
+                placeholder="Designation"
+              />
+              <select id="global-member-type">
+                <option value="faculty">Faculty</option>
+                <option value="staff">Staff</option>
+              </select>
+                <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px;">
+                <input type="number" id="global-short-granted" placeholder="Short (count)" min="0" />
+                <input type="number" id="global-half-granted" placeholder="Half-day (count)" min="0" />
+                <input type="number" id="global-casual-granted" placeholder="Full Day" min="0" />
+                <input type="number" id="global-medical-granted" placeholder="Medical" min="0" />
+                <input type="number" id="global-without-granted" placeholder="Without Payment" min="0" />
+                <input type="number" id="global-compensatory-granted" placeholder="Compensatory" min="0" />
+                <input type="number" id="global-earned-granted" placeholder="Earned" min="0" />
+                <input type="number" id="global-academic-granted" placeholder="Academic (excluded)" min="0" />
+              </div>
+              <div style="margin-top:6px;">Total Leaves (days): <span id="global-total-leaves">0.00</span></div>
+              <button type="submit">Create</button>
+            </form>
+          </div>
+          <div class="panel-card">
+            <h3>Update Faculty</h3>
+            <form id="faculty-update-form" class="stacked-form">
+              <input type="number" id="update-faculty-id" placeholder="ID" />
+              <input
+                type="text"
+                id="update-designation"
+                placeholder="New Designation"
+              />
+              <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px;">
+                <input type="number" id="update-short-granted" placeholder="Short (granted)" min="0" />
+                <input type="number" id="update-short-remaining" placeholder="Short (remaining)" min="0" readonly />
+                <input type="number" id="update-half-granted" placeholder="Half (granted)" min="0" />
+                <input type="number" id="update-half-remaining" placeholder="Half (remaining)" min="0" readonly />
+                <input type="number" id="update-casual-granted" placeholder="Full Day (granted)" min="0" />
+                <input type="number" id="update-casual-remaining" placeholder="Full Day (remaining)" min="0" readonly />
+                <input type="number" id="update-medical-granted" placeholder="Medical (granted)" min="0" />
+                <input type="number" id="update-medical-remaining" placeholder="Medical (remaining)" min="0" readonly />
+                <input type="number" id="update-without-granted" placeholder="Without Payment (granted)" min="0" />
+                <input type="number" id="update-without-remaining" placeholder="Without Payment (remaining)" min="0" readonly />
+                <input type="number" id="update-compensatory-granted" placeholder="Compensatory (granted)" min="0" />
+                <input type="number" id="update-compensatory-remaining" placeholder="Compensatory (remaining)" min="0" readonly />
+                <input type="number" id="update-earned-granted" placeholder="Earned (granted)" min="0" />
+                <input type="number" id="update-earned-remaining" placeholder="Earned (remaining)" min="0" readonly />
+                <input type="number" id="update-academic-granted" placeholder="Academic (granted)" min="0" />
+                <input type="number" id="update-academic-remaining" placeholder="Academic (remaining)" min="0" readonly />
+              </div>
+              <div style="margin-top:6px;">Total Leaves (days): <span id="update-total-leaves">0.00</span></div>
+              <button type="submit">Update Faculty</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section id="stats-panel" class="admin-panel hidden">
+        <div class="panel-header">
+          <h2>Institution Presence Summary</h2>
+          <div class="panel-actions">
+            <input type="date" id="stats-date" />
+            <button id="refresh-stats">Refresh</button>
+          </div>
+        </div>
+        <div class="admin-grid">
+          <div class="panel-card">
+            <h3>Departments</h3>
+            <table class="table-sm" id="dept-stats-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Present</th>
+                  <th>Absent</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="panel-card">
+            <h3>Hostels</h3>
+            <table class="table-sm" id="hostel-stats-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Present</th>
+                  <th>Absent</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="superadmin-panel" class="admin-panel hidden">
+        <h2>Super Admin Tools</h2>
+        <div class="admin-grid">
+          <div class="panel-card">
+            <h3>Create Admin</h3>
+            <form id="admin-create-form" class="stacked-form">
+              <input type="text" id="admin-username" placeholder="Username" />
+              <input type="password" id="admin-password" placeholder="Password" />
+              <select id="admin-role">
+                <option value="department_admin">Department Admin</option>
+                <option value="hostel_admin">Hostel Admin</option>
+                <option value="establishment_admin">Establishment Admin</option>
+                <option value="principal_admin">Principal Admin</option>
+              </select>
+              <select id="admin-scope-select" class="hidden"></select>
+              <button type="submit">Create Admin</button>
+            </form>
+          </div>
+          <div class="panel-card">
+            <h3>Admin Accounts</h3>
+            <table class="table-sm" id="admin-table">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Role</th>
+                  <th>Scope</th>
+                  <th>Password Hash</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="panel-card wide">
+            <div class="panel-header">
+              <h3>Activity Logs</h3>
+              <button id="export-logs">Export CSV</button>
+            </div>
+            <table class="table-sm" id="activity-table">
+              <thead>
+                <tr>
+                  <th>When</th>
+                  <th>User</th>
+                  <th>Action</th>
+                  <th>Entity</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,82 @@
+COLOR THEME (DASHBOARD UI)
+
+Project: Leave Management System
+Theme Type: Professional Blue Dashboard
+Use: Any Admin UI / Dashboard
+
+1) PRIMARY COLORS
+Primary:           #013a63
+Primary Hover:     #01497c
+Accent Blue:       #00aeff
+Accent Hover:      #0086b3
+
+2) NEUTRAL COLORS
+Background Light:  #f9f9f9
+Surface White:     #ffffff
+Text Dark:         #1e293b
+Text Muted:        #475569
+Border Light:      #d6d9dc
+Border Medium:     #ccc
+Shadow:            rgba(0,0,0,0.08)
+
+3) STATUS COLORS
+Success:           #28a745
+Success Hover:     #218838
+Success Light:     #d4edda
+Success Text:      #155724
+Warning:           #ffc107
+Warning Hover:     #e0a800
+Warning Light:     #fff3cd
+Warning Text:      #856404
+Danger:            #dc3545
+Danger Hover:      #c82333
+Danger Light:      #f8d7da
+Danger Text:       #721c24
+Info:              #17a2b8
+Info Light:        #d1ecf1
+Info Text:         #0c5460
+
+4) GRADIENT
+Grey Gradient:
+linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%)
+
+5) CSS VARIABLES
+:root {
+  --primary: #013a63;
+  --primary-hover: #01497c;
+  --accent: #00aeff;
+  --accent-hover: #0086b3;
+  --bg: #f9f9f9;
+  --surface: #ffffff;
+  --text-dark: #1e293b;
+  --text-muted: #475569;
+  --border-light: #d6d9dc;
+  --border-medium: #ccc;
+  --success: #28a745;
+  --success-hover: #218838;
+  --danger: #dc3545;
+  --danger-hover: #c82333;
+  --warning: #ffc107;
+  --info: #17a2b8;
+}
+
+6) COMPONENT COLOR RULES
+Header: background var(--primary); border-bottom var(--primary-hover); text white
+Primary Button: background var(--accent); hover var(--accent-hover); text white
+Danger Button: background var(--danger); hover var(--danger-hover); text white
+Success Button: background var(--success); hover var(--success-hover); text white
+Table header bg var(--primary-hover); header text white; row bg #f8f9fa
+Cards: background var(--surface); border #e4e6ef; shadow rgba(0,0,0,0.08); radius 10px
+
+7) TYPOGRAPHY
+Font: Arial, sans-serif
+h1: 1.8rem
+h2: 1.4rem
+body text: 16px
+button text: 14px
+
+8) SPACING SYSTEM
+Unit: 8px
+padding small 8px; medium 12px; large 20px
+border radius small 4px; medium 6px; large 10px
+

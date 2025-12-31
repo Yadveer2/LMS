@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principal's Executive Dashboard - Guru Nanak Dev Engineering College</title>
+    <link rel="stylesheet" href="/leave_mgmt/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/leave_mgmt/logout.js" defer></script>
+    <style>
+        /* ===== THEME VARIABLES ===== */
+        :root {
+            /* PRIMARY COLORS */
+            --primary: #013a63;
+            --primary-hover: #01497c;
+            --accent: #00aeff;
+            --accent-hover: #0086b3;
+
+            /* NEUTRAL COLORS */
+            --bg: #f9f9f9;
+            --surface: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #475569;
+            --border-light: #d6d9dc;
+            --border-medium: #ccc;
+            --shadow: rgba(0, 0, 0, 0.08);
+
+            /* STATUS COLORS */
+            --success: #28a745;
+            --success-hover: #218838;
+            --success-light: #d4edda;
+            --success-text: #155724;
+            --warning: #ffc107;
+            --warning-hover: #e0a800;
+            --warning-light: #fff3cd;
+            --warning-text: #856404;
+            --danger: #dc3545;
+            --danger-hover: #c82333;
+            --danger-light: #f8d7da;
+            --danger-text: #721c24;
+            --info: #17a2b8;
+            --info-light: #d1ecf1;
+            --info-text: #0c5460;
+
+            /* TYPOGRAPHY */
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --h1-size: 1.8rem;
+            --h2-size: 1.4rem;
+            --body-size: 16px;
+            --button-size: 14px;
+
+            /* SPACING */
+            --space-unit: 8px;
+            --space-xs: calc(var(--space-unit) * 1);
+            --space-sm: calc(var(--space-unit) * 1.5);
+            --space-md: calc(var(--space-unit) * 2);
+            --space-lg: calc(var(--space-unit) * 2.5);
+            --space-xl: calc(var(--space-unit) * 3);
+
+            /* SIDEBAR */
+            --sidebar-width: 260px;
+            --sidebar-collapsed: 70px;
+        }
+
+
+
+        /* ===== BASE STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            font-size: var(--body-size);
+            color: var(--text-dark);
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* ===== SIDEBAR NAVIGATION ===== */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--primary);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed);
+        }
+
+        .sidebar.collapsed .sidebar-title,
+        .sidebar.collapsed .sidebar-subtitle,
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .user-info-sidebar {
+            display: none;
+        }
+
+        .sidebar.collapsed .sidebar-header {
+            padding: var(--space-md);
+            justify-content: center;
+        }
+
+        .sidebar.collapsed .sidebar-header {
+            overflow: visible;
+        }
+
+        .sidebar.collapsed .nav-link {
+            justify-content: center;
+            padding: var(--space-md);
+        }
+
+        .sidebar.collapsed .sidebar-footer {
+            padding: var(--space-md);
+        }
+
+        .sidebar-header {
+            padding: var(--space-xl) var(--space-lg);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            position: relative;
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-title {
+            font-size: var(--h2-size);
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .sidebar-subtitle {
+            font-size: 12px;
+            opacity: 0.8;
+            white-space: nowrap;
+        }
+
+        .toggle-sidebar {
+            background: none;
+            border: none;
+            color: rgb(255, 255, 255);
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            margin-left: auto;
+            z-index: 1100;
+        }
+
+        .toggle-sidebar:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar.collapsed .toggle-sidebar {
+            transform: rotate(180deg);
+            position: absolute;
+            right: 21px;
+            top: 22px;
+            z-index: 9999;
+        }
+
+        /* Ensure logo stays beneath the toggle when collapsed */
+        .sidebar.collapsed .sidebar-logo {
+            position: relative;
+            z-index: 0;
+            transform: translateX(6px) translateY(0);
+        }
+
+        /* Safety: ensure toggle remains on top in expanded state too */
+        .toggle-sidebar {
+            z-index: 9999;
+        }
+
+        .nav-menu {
+            padding: var(--space-lg) 0;
+        }
+
+        .nav-item {
+            list-style: none;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md) var(--space-lg);
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+            white-space: nowrap;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left-color: var(--accent);
+        }
+
+        .nav-link.active {
+            background: var(--primary-hover);
+            color: white;
+            border-left-color: var(--accent);
+        }
+
+        .nav-icon {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .nav-text {
+            font-size: 14px;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .notification-badge {
+            background: var(--danger);
+            color: white;
+            font-size: 10px;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+            margin-left: auto;
+        }
+
+        .sidebar.collapsed .notification-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            margin-left: 0;
+        }
+
+        .sidebar-footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: var(--space-lg);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--primary);
+        }
+
+        .user-profile-sidebar {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .user-avatar-sidebar {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .user-info-sidebar {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .user-name-sidebar {
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role-sidebar {
+            font-size: 12px;
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .logout-btn-sidebar {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+            cursor: pointer;
+            padding: var(--space-xs);
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .logout-btn-sidebar:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: var(--space-xl);
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .main-content.expanded {
+            margin-left: var(--sidebar-collapsed);
+        }
+
+        /* ===== HEADER ===== */
+        .dashboard-header {
+            background: var(--surface);
+            border-radius: 10px;
+            padding: var(--space-lg) var(--space-xl);
+            margin-bottom: var(--space-xl);
+            box-shadow: 0 2px 10px var(--shadow);
+            border-left: 5px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            color: var(--primary);
+            margin-bottom: var(--space-xs);
+            font-size: var(--h1-size);
+            font-weight: 700;
+        }
+
+        .header-left h2 {
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        .date-display {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .header-right {
+            display: flex;
+            gap: var(--space-md);
+            align-items: center;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg);
+            padding: 10px 15px;
+            border-radius: 30px;
+            border: 1px solid var(--border-light);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        /* ===== CONTENT SECTIONS ===== */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== DASHBOARD SECTION ===== */
+        /* Main Stats */
+        .main-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+
+        .stat-card-large {
+            background: var(--surface);
+            border-radius: 10px;
+            padding: var(--space-xl);
+            box-shadow: 0 4px 12px var(--shadow);
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-light);
+        }
+
+        .stat-card-large:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-icon-large {
+            font-size: 42px;
+            margin-bottom: var(--space-lg);
+            color: var(--accent);
+        }
+
+        .stat-value-large {
+            font-size: 38px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .stat-label-large {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-bottom: var(--space-md);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: var(--space-md);
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-green {
+            background: linear-gradient(90deg, var(--success), #5cb85c);
+        }
+
+        .progress-blue {
+            background: linear-gradient(90deg, var(--accent), #007bff);
+        }
+
+        .progress-orange {
+            background: linear-gradient(90deg, var(--warning), #f0ad4e);
+        }
+
+        .progress-red {
+            background: linear-gradient(90deg, var(--danger), #d9534f);
+        }
+
+        /* Charts Section */
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: var(--space-xl);
+            margin-bottom: var(--space-xl);
+        }
+
+        @media (max-width: 1200px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: var(--surface);
+            border-radius: 10px;
+            padding: var(--space-xl);
+            box-shadow: 0 4px 12px var(--shadow);
+            border: 1px solid var(--border-light);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+        }
+
+        .chart-title {
+            font-size: 18px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .chart-container {
+            position: relative;
+        }
+
+        /* Bar Chart */
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .bar-label {
+            width: 180px;
+            font-size: 14px;
+            color: var(--text-dark);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.8s ease;
+        }
+
+        .bar-percentage {
+            width: 50px;
+            text-align: right;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 14px;
+        }
+
+        /* ===== REPORT SECTIONS ===== */
+        .data-table-section {
+            background: var(--surface);
+            border-radius: 10px;
+            padding: var(--space-xl);
+            box-shadow: 0 4px 12px var(--shadow);
+            margin-bottom: var(--space-xl);
+            border: 1px solid var(--border-light);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+            padding-bottom: var(--space-md);
+            border-bottom: 2px solid #eee;
+        }
+
+        .section-title {
+            font-size: var(--h2-size);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: var(--space-xl);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-label {
+            font-weight: 500;
+            color: var(--text-dark);
+            font-size: 14px;
+        }
+
+        .filter-select,
+        .filter-input {
+            padding: 8px 15px;
+            border: 1px solid var(--border-medium);
+            border-radius: 6px;
+            background: var(--surface);
+            font-size: 14px;
+            color: var(--text-dark);
+            min-width: 150px;
+        }
+
+        .filter-select:focus,
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 174, 255, 0.1);
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: 6px;
+            border: none;
+            font-size: var(--button-size);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 174, 255, 0.2);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: var(--success-hover);
+        }
+
+        .btn-logout {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-logout:hover {
+            background: var(--danger-hover);
+        }
+
+        /* ===== TABLES ===== */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 6px;
+            border: 1px solid var(--border-light);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .data-table th {
+            background: var(--primary-hover);
+            padding: var(--space-md);
+            text-align: left;
+            color: white;
+            font-weight: 600;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .data-table td {
+            padding: var(--space-md);
+            border-bottom: 1px solid var(--border-light);
+            vertical-align: middle;
+        }
+
+        .data-table tr {
+            background: var(--surface);
+            transition: background 0.2s;
+        }
+
+        .data-table tr:hover {
+            background: var(--bg);
+        }
+
+        .data-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        /* Center the last column (Action buttons) */
+        .data-table th:last-child,
+        .data-table td:last-child {
+            text-align: center;
+        }
+
+        /* ===== BADGES ===== */
+        .attendance-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-high {
+            background: var(--success-light);
+            color: var(--success-text);
+        }
+
+        .badge-medium {
+            background: var(--warning-light);
+            color: var(--warning-text);
+        }
+
+        .badge-low {
+            background: var(--danger-light);
+            color: var(--danger-text);
+        }
+
+        /* ===== ACTION BUTTONS IN TABLE ===== */
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            gap: 4px;
+            min-width: 80px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .btn-sm:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* ===== FOOTER ACTIONS ===== */
+        .footer-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        /* ===== MODALS ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-lg);
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 10px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: var(--space-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .modal-title {
+            font-size: var(--h2-size);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: var(--danger);
+        }
+
+        .modal-body {
+            padding: var(--space-lg);
+        }
+
+        .form-group {
+            margin-bottom: var(--space-lg);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--space-xs);
+            color: var(--text-dark);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: var(--space-sm) var(--space-md);
+            border: 1px solid var(--border-medium);
+            border-radius: 6px;
+            font-size: 16px;
+            font-family: var(--font-family);
+            transition: all 0.3s;
+            background: var(--surface);
+            color: var(--text-dark);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 174, 255, 0.1);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                text-align: center;
+                gap: var(--space-md);
+            }
+
+            .main-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+
+            .filter-select,
+            .filter-input {
+                width: 100%;
+            }
+
+            .bar-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .bar-label {
+                width: 100%;
+            }
+
+            .bar-track {
+                width: 100%;
+            }
+
+            .footer-actions {
+                flex-direction: column;
+            }
+
+            .footer-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: var(--space-md);
+            }
+
+            .dashboard-header {
+                padding: var(--space-md);
+            }
+
+            .data-table-section {
+                padding: var(--space-md);
+            }
+
+            .chart-card {
+                padding: var(--space-md);
+            }
+        }
+
+        /* ===== LOADING & NO DATA STATES ===== */
+        .loading,
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+
+        .no-data {
+            font-style: italic;
+        }
+
+        /* Last Updated */
+        .last-updated {
+            text-align: right;
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+        }
+
+
+        /* Add to your existing CSS */
+.analysis-chart-card {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid var(--border-light);
+    transition: all 0.3s ease;
+}
+
+.analysis-chart-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.summary-stat-card {
+    background: var(--surface);
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid var(--accent);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+}
+
+.summary-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* Animation for chart loading */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.analysis-chart-card {
+    animation: fadeInUp 0.5s ease-out;
+}
+    </style>
+</head>
+
+<body>
+    <!-- ===== SIDEBAR NAVIGATION ===== -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div>
+                <div class="sidebar-title">GNDEC</div>
+                <div class="sidebar-subtitle">Leave Management</div>
+            </div>
+            <button class="toggle-sidebar" onclick="toggleSidebar()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="#" class="nav-link active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt nav-icon"></i>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-section="department-reports">
+                    <i class="fas fa-building nav-icon"></i>
+                    <span class="nav-text">Department Reports</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-section="hostel-reports">
+                    <i class="fas fa-home nav-icon"></i>
+                    <span class="nav-text">Hostel Reports</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-section="reports">
+                    <i class="fas fa-file-alt nav-icon"></i>
+                    <span class="nav-text">Custom Reports</span>
+                </a>
+            </li>
+
+            <!-- Add this after the "Custom Reports" item -->
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-section="analysis">
+                    <i class="fas fa-chart-pie nav-icon"></i>
+                    <span class="nav-text">Analysis & Insights</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="user-profile-sidebar">
+                <div class="user-avatar-sidebar" id="sidebarUserInitials">PA</div>
+                <div class="user-info-sidebar">
+                    <div class="user-name-sidebar" id="sidebarUsername">Principal Admin</div>
+                    <div class="user-role-sidebar">Administrator</div>
+                </div>
+                <button class="logout-btn-sidebar" onclick="logout()" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+        <!-- Dashboard Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h1>Guru Nanak Dev Engineering College</h1>
+                <h2 id="currentSection">Principal's Executive Dashboard</h2>
+                <div class="date-display" id="currentDate"></div>
+            </div>
+            <div class="header-right">
+                <div class="user-profile">
+                    <div class="user-avatar" id="userInitials">PA</div>
+                    <div>
+                        <div id="username">Principal Admin</div>
+                        <div style="font-size: 12px; color: var(--success); font-weight: 500;">
+                            <i class="fas fa-circle" style="font-size: 8px;"></i> Online
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-logout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- ===== DASHBOARD SECTION ===== -->
+        <section id="dashboard-section" class="content-section active">
+            <!-- Main Stats -->
+            <div class="main-stats">
+                <div class="stat-card-large">
+                    <div class="stat-icon-large">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="stat-value-large" id="departmentCount">0</div>
+                    <div class="stat-label-large">Total Departments</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill progress-blue" style="width: 100%"></div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 14px; color: var(--text-muted);">
+                        <span id="activeDepartments">0</span> active departments
+                    </div>
+                </div>
+
+                <div class="stat-card-large">
+                    <div class="stat-icon-large">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div class="stat-value-large" id="hostelCount">0</div>
+                    <div class="stat-label-large">Total Hostels</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill progress-green" style="width: 100%"></div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 14px; color: var(--text-muted);">
+                        <span id="activeHostels">0</span> active hostels
+                    </div>
+                </div>
+
+                <div class="stat-card-large">
+                    <div class="stat-icon-large">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="stat-value-large" id="totalAttendance">0%</div>
+                    <div class="stat-label-large">Overall Attendance Today</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill progress-orange" id="overallProgress" style="width: 0%"></div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 14px; color: var(--text-muted);">
+                        <span id="dateDisplay">Today</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section">
+                <!-- Department Attendance Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Department Attendance Distribution</h3>
+                        <select class="filter-select" id="facultyChartFilter" onchange="updateFacultyChart()">
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <div class="bar-chart" id="facultyChart">
+                            <div class="loading">Loading department attendance data...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hostel Staff Attendance Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Hostel Staff Attendance Distribution</h3>
+                        <select class="filter-select" id="staffChartFilter" onchange="updateStaffChart()">
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <div class="bar-chart" id="staffChart">
+                            <div class="loading">Loading staff attendance data...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Filters -->
+            <div class="filters">
+                <div class="filter-group">
+                    <span class="filter-label">Date:</span>
+                    <input type="date" class="filter-input" id="statsDate" value="">
+                </div>
+                <button id="refreshBtn" class="btn btn-primary" onclick="refreshDashboard()">
+                    <i class="fas fa-sync-alt"></i> Refresh Dashboard
+                </button>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="footer-actions">
+                <button class="btn btn-primary" onclick="generateCustomReport()">
+                    <i class="fas fa-calendar-alt"></i> Generate Custom Report
+                </button>
+                <button class="btn btn-primary" onclick="refreshDashboard()">
+                    <i class="fas fa-sync-alt"></i> Refresh All Data
+                </button>
+            </div>
+        </section>
+
+        <!-- ===== DEPARTMENT REPORTS SECTION ===== -->
+        <section id="department-reports-section" class="content-section">
+            <div class="data-table-section">
+                <div class="section-header">
+                    <h3 class="section-title">Department Reports</h3>
+                </div>
+
+                <div class="filters">
+                    <div class="filter-group">
+                        <span class="filter-label">Date:</span>
+                        <input type="date" class="filter-input" id="deptStatsDate" value="">
+                    </div>
+                    <div class="filter-group">
+                        <span class="filter-label">View:</span>
+                        <select class="filter-select" id="deptViewType" onchange="loadDepartmentReports()">
+                            <option value="all">All Departments</option>
+                            <option value="critical">Critical Only (&lt;75%)</option>
+                            <option value="good">Good Performance (&gt;90%)</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="loadDepartmentReports()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Department Name</th>
+                                <th>Total Faculty</th>
+                                <th>Present Today</th>
+                                <th>Absent Today</th>
+                                <th>Attendance %</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="departmentsTable">
+                            <tr class="loading">
+                                <td colspan="6">Loading department reports...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== HOSTEL REPORTS SECTION ===== -->
+        <section id="hostel-reports-section" class="content-section">
+            <div class="data-table-section">
+                <div class="section-header">
+                    <h3 class="section-title">Hostel Staff Reports</h3>
+                </div>
+
+                <div class="filters">
+                    <div class="filter-group">
+                        <span class="filter-label">Date:</span>
+                        <input type="date" class="filter-input" id="hostelStatsDate" value="">
+                    </div>
+                    <button class="btn btn-primary" onclick="loadHostelReports()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Hostel Name</th>
+                                <th>Total Staff</th>
+                                <th>Present Today</th>
+                                <th>Absent Today</th>
+                                <th>Attendance %</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hostelsTable">
+                            <tr class="loading">
+                                <td colspan="6">Loading hostel reports...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== CUSTOM REPORTS SECTION ===== -->
+        <section id="reports-section" class="content-section">
+            <div class="data-table-section">
+                <div class="section-header">
+                    <h3 class="section-title">Custom Report Generation</h3>
+                </div>
+
+                <div style="margin-bottom: var(--space-xl);">
+                    <h4 style="color: var(--text-dark); margin-bottom: var(--space-md);">Quick Reports</h4>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="generateAllDepartmentsReport()">
+                            <i class="fas fa-download"></i> All Departments Report
+                        </button>
+                        <button class="btn btn-primary" onclick="generateAllHostelsReport()">
+                            <i class="fas fa-download"></i> All Hostels Report
+                        </button>
+                        <button class="btn btn-success" onclick="generateCustomReport()">
+                            <i class="fas fa-cog"></i> Custom Report
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 style="color: var(--text-dark); margin-bottom: var(--space-md);">Instructions</h4>
+                    <div
+                        style="background: var(--bg); padding: var(--space-lg); border-radius: 8px; border: 1px solid var(--border-light);">
+                        <p style="margin-bottom: var(--space-sm); color: var(--text-muted);">
+                            <strong>Quick Reports:</strong> Generate reports for all departments or hostels for today.
+                        </p>
+                        <p style="margin-bottom: var(--space-sm); color: var(--text-muted);">
+                            <strong>Custom Reports:</strong> Select specific date range and scope for detailed reports.
+                        </p>
+                        <p style="color: var(--text-muted);">
+                            <strong>Note:</strong> Reports are generated as PDF files for easy printing and sharing.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== ANALYSIS SECTION ===== -->
+        <section id="analysis-section" class="content-section">
+            <div class="data-table-section">
+                <div class="section-header">
+                    <h3 class="section-title">Leave Analysis & Insights</h3>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="btn btn-primary" onclick="exportAnalysisData()">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filters">
+                    <div class="filter-group">
+                        <span class="filter-label">Date:</span>
+                        <input type="date" class="filter-input" id="analysisDate" value="">
+                    </div>
+                    <div class="filter-group">
+                        <span class="filter-label">Scope:</span>
+                        <select class="filter-select" id="analysisScope" onchange="loadAnalysisData()">
+                            <option value="department">Departments</option>
+                            <option value="hostel">Hostels</option>
+                        </select>
+                    </div>
+                    <!-- View option removed per request -->
+                    <button class="btn btn-primary" onclick="loadAnalysisData()">
+                        <i class="fas fa-sync-alt"></i> Refresh Analysis
+                    </button>
+                </div>
+
+                <!-- Analysis Summary -->
+                <div id="analysisSummary" style="display: none; margin-bottom: 30px;">
+                    <div class="summary-stats"
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+                        <!-- Summary will be populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Analysis Charts Container -->
+                <div id="analysisCharts"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); gap: 25px;">
+                    <div class="loading" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <i class="fas fa-spinner fa-spin" style="margin-right: 10px;"></i>
+                        Loading analysis data...
+                    </div>
+                </div>
+
+                <!-- No Data Message (hidden by default) -->
+                <div id="noAnalysisData" style="display: none; text-align: center; padding: 40px;">
+                    <i class="fas fa-chart-bar" style="font-size: 48px; color: #ccc; margin-bottom: 15px;"></i>
+                    <h4 style="color: var(--text-muted);">No analysis data available</h4>
+                    <p style="color: var(--text-muted);">Try selecting a different date or scope.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+
+    <!-- Report Generation Modal -->
+    <div class="modal" id="reportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Generate Custom Report</h3>
+                <button class="close-modal" onclick="closeReportModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="reportForm">
+                    <div class="form-group">
+                        <label>Report Type</label>
+                        <select id="reportType" class="form-control" onchange="toggleReportScope()">
+                            <option value="department">Department Report</option>
+                            <option value="hostel">Hostel Report</option>
+                            <option value="all">All Departments</option>
+                            <option value="all_hostels">All Hostels</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="scopeGroup">
+                        <label id="scopeLabel">Select Department</label>
+                        <select id="reportScope" class="form-control">
+                            <option value="">Loading...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Date Range</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="date" id="fromDate" class="form-control" required>
+                            <input type="date" id="toDate" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary" style="width: 100%;" onclick="generateReport()">
+                            <i class="fas fa-download"></i> Generate & Download Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/leave_mgmt/principal.js"></script>
+    <script>
+        // Set current date
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        // Set today's date in all date pickers
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('statsDate').value = today;
+        document.getElementById('deptStatsDate').value = today;
+        document.getElementById('hostelStatsDate').value = today;
+
+        // ===== NAVIGATION SYSTEM =====
+        document.addEventListener('DOMContentLoaded', function () {
+            // Setup sidebar navigation
+            setupNavigation();
+
+            // Setup logout button
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+
+            // Sync date pickers
+            setupDateSync();
+        });
+
+        function setupNavigation() {
+            // Navigation click handlers
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    // Remove active class from all links and sections
+                    document.querySelectorAll('.nav-link').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    document.querySelectorAll('.content-section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+
+                    // Add active class to clicked link
+                    this.classList.add('active');
+
+                    // Show corresponding section
+                    const sectionId = this.getAttribute('data-section') + '-section';
+                    const section = document.getElementById(sectionId);
+                    if (section) {
+                        section.classList.add('active');
+
+                        // Update header title
+                        const sectionTitles = {
+                            'dashboard': 'Principal\'s Executive Dashboard',
+                            'department-reports': 'Department Reports',
+                            'hostel-reports': 'Hostel Reports',
+                            'reports': 'Custom Reports',
+                            'analysis': 'Leave Analysis & Insights'
+                        };
+
+                        const sectionName = this.getAttribute('data-section');
+                        document.getElementById('currentSection').textContent = sectionTitles[sectionName] || 'Principal\'s Executive Dashboard';
+
+                        // Load section data if needed
+                        loadSectionData(sectionName);
+                    }
+                });
+            });
+        }
+
+        function loadSectionData(section) {
+            if (!window.principalDashboard) return;
+
+            switch (section) {
+                case 'department-reports':
+                    window.principalDashboard.loadDepartmentReports();
+                    break;
+                case 'hostel-reports':
+                    window.principalDashboard.loadHostelReports();
+                    break;
+                case 'analysis':  // ADD THIS CASE
+                    window.principalDashboard.loadAnalysisData();
+                    break;
+                case 'reports':
+                    // Initialize report modal if needed
+                    break;
+            }
+        }
+
+        function setupDateSync() {
+            // Sync stats date with dept/hostel dates
+            const statsDate = document.getElementById('statsDate');
+            const deptStatsDate = document.getElementById('deptStatsDate');
+            const hostelStatsDate = document.getElementById('hostelStatsDate');
+
+            statsDate.addEventListener('change', function () {
+                deptStatsDate.value = this.value;
+                hostelStatsDate.value = this.value;
+            });
+
+            deptStatsDate.addEventListener('change', function () {
+                statsDate.value = this.value;
+                hostelStatsDate.value = this.value;
+            });
+
+            hostelStatsDate.addEventListener('change', function () {
+                statsDate.value = this.value;
+                deptStatsDate.value = this.value;
+            });
+        }
+
+        // ===== SIDEBAR TOGGLE =====
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+        }
+
+        // ===== UTILITY FUNCTIONS =====
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/leave_mgmt';
+            }
+        }
+
+        // Make functions globally available
+        window.toggleSidebar = toggleSidebar;
+        window.logout = logout;
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function (e) {
+            const modal = document.getElementById('reportModal');
+            if (e.target === modal) {
+                closeReportModal();
+            }
+        });
+    </script>
+
+
+</body>
+
+</html>
