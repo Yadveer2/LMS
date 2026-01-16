@@ -8,6 +8,34 @@ class EstablishmentDashboard {
         this.init();
     }
 
+    populateUpdateDesignation(memberType) {
+        const designationSelect = document.getElementById('updateDesignation');
+        if (!designationSelect) return;
+
+        if (memberType === 'faculty') {
+            designationSelect.innerHTML = `
+                <option value="" disabled>Select Designation</option>
+                <option value="Professor">Professor</option>
+                <option value="Associate Professor">Associate Professor</option>
+                <option value="Assistant Professor">Assistant Professor</option>
+                <option value="Clerk">Clerk</option>
+                <option value="Lab Technician">Lab Technician</option>
+                <option value="Lab Attendant">Lab Attendant</option>
+                <option value="Attendant">Attendant</option>
+            `;
+        } else {
+            designationSelect.innerHTML = `
+                <option value="" disabled>Select Designation</option>
+                <option value="Warden">Warden</option>
+                <option value="Caretaker">Caretaker</option>
+                <option value="Mess Manager">Mess Manager</option>
+                <option value="Hostel Staff">Hostel Staff</option>
+                <option value="Security">Security</option>
+                <option value="Cleaner">Cleaner</option>
+            `;
+        }
+    }
+
     async init() {
         await this.loadUserInfo();
         await this.loadData();
@@ -221,6 +249,51 @@ class EstablishmentDashboard {
         if (personnelTypeEl) {
             personnelTypeEl.addEventListener('change', () => this.updateDesignationDropdown && this.updateDesignationDropdown());
         }
+    }
+
+    // Show a centered input modal and return entered value (or null if cancelled)
+    showInputModal(title = 'Input', label = '', defaultValue = '') {
+        return new Promise(resolve => {
+            // modal elements
+            const modal = document.getElementById('inputPromptModal');
+            const titleEl = document.getElementById('inputPromptTitle');
+            const labelEl = document.getElementById('inputPromptLabel');
+            const inputEl = document.getElementById('inputPromptValue');
+            const okBtn = document.getElementById('inputPromptOk');
+            const cancelBtn = document.getElementById('inputPromptCancel');
+            const closeBtn = document.getElementById('inputPromptClose');
+
+            if (!modal || !inputEl) {
+                // fallback to prompt
+                const val = window.prompt(label || title, defaultValue || '');
+                resolve(val);
+                return;
+            }
+
+            titleEl.textContent = title;
+            labelEl.textContent = label;
+            inputEl.value = defaultValue || '';
+            modal.style.display = 'flex';
+            inputEl.focus();
+
+            function cleanup(result) {
+                modal.style.display = 'none';
+                okBtn.removeEventListener('click', onOk);
+                cancelBtn.removeEventListener('click', onCancel);
+                closeBtn.removeEventListener('click', onCancel);
+                inputEl.removeEventListener('keydown', onKey);
+                resolve(result);
+            }
+
+            function onOk() { cleanup(inputEl.value); }
+            function onCancel() { cleanup(null); }
+            function onKey(e) { if (e.key === 'Enter') onOk(); if (e.key === 'Escape') onCancel(); }
+
+            okBtn.addEventListener('click', onOk);
+            cancelBtn.addEventListener('click', onCancel);
+            closeBtn.addEventListener('click', onCancel);
+            inputEl.addEventListener('keydown', onKey);
+        });
     }
 
     setupNavigation() {
@@ -447,6 +520,27 @@ tbody.innerHTML = filteredHostels.map(hostel => {
             this.departments.map(dept => `<option value="${dept.id}">${dept.name}</option>`).join('');
     }
 
+    // Load options for the update modal's scope (department or hostel) and preselect current
+    async loadUpdateScopeOptions(scopeType, selectElement, selectedId) {
+        if (!selectElement) return;
+
+        // Clear existing
+        selectElement.innerHTML = '';
+
+        const labelEl = document.getElementById('updateDepartmentLabel');
+        if (scopeType === 'department') {
+            if (labelEl) labelEl.textContent = 'Department';
+            selectElement.innerHTML = '<option value="">Select Department</option>' +
+                this.departments.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+            if (selectedId) selectElement.value = selectedId;
+        } else if (scopeType === 'hostel') {
+            if (labelEl) labelEl.textContent = 'Hostel';
+            selectElement.innerHTML = '<option value="">Select Hostel</option>' +
+                this.hostels.map(h => `<option value="${h.id}">${h.name}</option>`).join('');
+            if (selectedId) selectElement.value = selectedId;
+        }
+    }
+
     filterPersonnel() {
         const typeFilter = document.getElementById('personnelTypeFilter').value;
         const scopeFilter = document.getElementById('personnelScopeFilter').value;
@@ -545,17 +639,21 @@ tbody.innerHTML = filteredHostels.map(hostel => {
         document.getElementById('addPersonnelForm').reset();
     }
 
-    showUpdatePersonnelModal(personnelId) {
+    async showUpdatePersonnelModal(personnelId) {
         const person = this.personnel.find(p => p.id === personnelId);
         if (!person) return;
         
         document.getElementById('updatePersonnelId').value = person.id;
         document.getElementById('updateName').value = person.faculty_name;
-        document.getElementById('updateDesignation').value = person.designation || '';
+        const memberType = person.member_type || (person.department_id ? 'faculty' : 'staff');
+        this.populateUpdateDesignation(memberType);
+        const updateDesignationSelect = document.getElementById('updateDesignation');
+        if (updateDesignationSelect) updateDesignationSelect.value = person.designation || '';
 
-        if (person.department_id) {
-            document.getElementById('updateDepartment').value = person.department_id;
-        }
+        const updateDeptSelect = document.getElementById('updateDepartment');
+        const scopeForPerson = memberType === 'faculty' ? 'department' : 'hostel';
+        const selectedScopeId = memberType === 'faculty' ? person.department_id : person.hostel_id;
+        await this.loadUpdateScopeOptions(scopeForPerson, updateDeptSelect, selectedScopeId);
         document.getElementById('updateYearOfJoining').value = person.year_of_joining || '';
         document.getElementById('updateEmploymentType').value = person.employment_type || '';
         document.getElementById('updateRemark').value = person.remark || '';
@@ -855,7 +953,7 @@ updatePersonnelForm() {
         const dept = this.departments.find(d => d.id === deptId);
         if (!dept) return;
         
-        const newName = prompt('Enter new department name:', dept.name);
+        const newName = await this.showInputModal('Edit Department', 'Enter new department name:', dept.name);
         if (!newName || newName.trim() === '') return;
         
         try {
@@ -909,7 +1007,7 @@ updatePersonnelForm() {
             alert('Failed to delete department. Make sure no faculty or admins depend on it.');
         }
     }
-
+     
     async addHostel() {
         const name = document.getElementById('hostelNameInput').value.trim();
         
@@ -950,7 +1048,7 @@ updatePersonnelForm() {
         const hostel = this.hostels.find(h => h.id === hostelId);
         if (!hostel) return;
         
-        const newName = prompt('Enter new hostel name:', hostel.name);
+        const newName = await this.showInputModal('Edit Hostel', 'Enter new hostel name:', hostel.name);
         if (!newName || newName.trim() === '') return;
         
         try {

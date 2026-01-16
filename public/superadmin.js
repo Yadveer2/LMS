@@ -473,6 +473,68 @@ class SuperAdminDashboard {
         });
     }
 
+        // Centered input modal helper - returns entered string or null if cancelled
+        showInputModal(title = 'Input', label = '', defaultValue = '') {
+                return new Promise(resolve => {
+                        let modal = document.getElementById('saInputModal');
+                        if (!modal) {
+                                modal = document.createElement('div');
+                                modal.id = 'saInputModal';
+                                modal.className = 'modal';
+                                modal.style.display = 'none';
+                                modal.innerHTML = `
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h3 class="modal-title" id="saInputTitle"></h3>
+                                                <button class="close-modal" id="saInputClose">&times;</button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="form-group">
+                                                    <label id="saInputLabel"></label>
+                                                    <input type="text" id="saInputValue" class="form-control" />
+                                                </div>
+                                            </div>
+                                            <div style="padding:12px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid #eee;">
+                                                <button class="btn" id="saInputCancel" style="border:1px solid #ccc;background:#fff;">Cancel</button>
+                                                <button class="btn btn-primary" id="saInputOk">OK</button>
+                                            </div>
+                                        </div>`;
+                                document.body.appendChild(modal);
+                        }
+
+                        const titleEl = modal.querySelector('#saInputTitle');
+                        const labelEl = modal.querySelector('#saInputLabel');
+                        const inputEl = modal.querySelector('#saInputValue');
+                        const okBtn = modal.querySelector('#saInputOk');
+                        const cancelBtn = modal.querySelector('#saInputCancel');
+                        const closeBtn = modal.querySelector('#saInputClose');
+
+                        titleEl.textContent = title;
+                        labelEl.textContent = label;
+                        inputEl.value = defaultValue || '';
+                        modal.style.display = 'flex';
+                        inputEl.focus();
+
+                        function cleanup(result) {
+                                modal.style.display = 'none';
+                                okBtn.removeEventListener('click', onOk);
+                                cancelBtn.removeEventListener('click', onCancel);
+                                closeBtn.removeEventListener('click', onCancel);
+                                inputEl.removeEventListener('keydown', onKey);
+                                resolve(result);
+                        }
+
+                        function onOk() { cleanup(inputEl.value); }
+                        function onCancel() { cleanup(null); }
+                        function onKey(e) { if (e.key === 'Enter') onOk(); if (e.key === 'Escape') onCancel(); }
+
+                        okBtn.addEventListener('click', onOk);
+                        cancelBtn.addEventListener('click', onCancel);
+                        closeBtn.addEventListener('click', onCancel);
+                        inputEl.addEventListener('keydown', onKey);
+                });
+        }
+
     async deleteAdminUser(userId, username) {
         if (!confirm(`Are you sure you want to delete admin user "${username}"? This action cannot be undone.`)) {
             return;
@@ -1776,7 +1838,7 @@ class SuperAdminDashboard {
     // Add these methods to the SuperAdminDashboard class
 
     async editScope(scopeType, scopeId, currentName) {
-        const newName = prompt(`Edit ${scopeType} name:`, currentName);
+        const newName = await this.showInputModal(`Edit ${scopeType}`, `Enter new ${scopeType} name:`, currentName);
         if (!newName || newName.trim() === '' || newName === currentName) return;
 
         try {

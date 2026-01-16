@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Clear local storage
                     localStorage.clear();
                     sessionStorage.clear();
-                    
-                    // Redirect to login
+                    // Notify other tabs and redirect to login
+                    try { localStorage.setItem('leave_mgmt_session_event', JSON.stringify({ type: 'logout', ts: Date.now() })); } catch (e) {}
                     window.location.href = '/leave_mgmt';
                 } else {
                     alert('Logout failed. Please try again.');

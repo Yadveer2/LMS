@@ -139,6 +139,10 @@
               "PERMISSIONS",
               JSON.stringify(data.permissions || {})
             );
+            // Notify other tabs in same browser that a new login occurred
+            try {
+              localStorage.setItem('leave_mgmt_session_event', JSON.stringify({ type: 'login', ts: Date.now() }));
+            } catch (e) {}
             window.location.href = "/leave_mgmt/dashboard";
           })
           .catch((err) => {

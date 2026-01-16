@@ -1,57 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Leave Details</title>
     <link rel="stylesheet" href="/leave_mgmt/leaveDetails.css" />
     <script defer src="/leave_mgmt/leaveDetails.js"></script>
-  </head>
+</head>
 
-  <body>
-    <div class="leaveHeader">
-      <div class="leaveHeadleft">
-        <img src="/leave_mgmt/assets/Img/logo.png" alt="College Logo" />
-      </div>
-      <div class="leaveHeadData">
-        <h2>
-          Leave Details for <span id="faculty-name"></span> (<span
-            id="faculty-designation"
-          ></span
-          >)
-        </h2>
-        <p class="heading--scope-name"></p>
-      </div>
-      <div class="leaveHeadRight">
-        <button id="logout-button">Logout</button>
-      </div>
-    </div>
-    <div class="message-box hidden"><p class="message">Loading PDf</p></div>
-    <div class="generatingReport">
-      <div class="date">
-        <p class="select-range">Select Range :</p>
-        <label class="insidelabel">From:</label>
-        <input type="date" class="leave-date from-date" />
-        <label class="insidelabel">To:</label>
-        <input type="date" class="leave-date to-date" />
-      </div>
-      <div>
-        <button id="report">Generate Report</button>
-      </div>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Leave Category</th>
-          <th>Date</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="leave-table"></tbody>
-    </table>
-    <!-- <div class="summary"></div> -->
-        <script src="/leave_mgmt/tabClient.js"></script>
-    <h3 class="total">Total Leaves: <span id="total-leaves"></span></h3>
-    <a class="back-btn" href="/leave_mgmt/dashboard">Back to Dashboard</a>
-  </body>
+<body>
+    <header class="leaveHeader">
+        <div class="header-container">
+            <div class="leaveHeadleft">
+                <img src="/leave_mgmt/assets/Img/logo.png" alt="College Logo" />
+            </div>
+            <div class="leaveHeadData">
+                <h2>
+                    Leave Details for <span id="faculty-name"></span> 
+                    (<span id="faculty-designation"></span>)
+                </h2>
+                <p class="heading--scope-name"></p>
+            </div>
+            <div class="leaveHeadRight">
+                <button id="logout-button" class="btn-logout">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="message-box hidden">
+            <p class="message">Loading PDF</p>
+        </div>
+        
+        <div class="controls-container">
+            <div class="generatingReport">
+                <div class="date-range">
+                    <p class="select-range">Select Range:</p>
+                    <div class="date-inputs">
+                        <div class="input-group">
+                            <label class="insidelabel">From:</label>
+                            <input type="date" class="leave-date from-date" />
+                        </div>
+                        <div class="input-group">
+                            <label class="insidelabel">To:</label>
+                            <input type="date" class="leave-date to-date" />
+                        </div>
+                    </div>
+                </div>
+                <div class="report-button">
+                    <button id="report" class="btn-report">Generate Report</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="leave-table">
+                <thead>
+                    <tr>
+                        <th>Leave Category</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="leave-table"></tbody>
+            </table>
+        </div>
+
+        <div class="footer-content">
+            <div class="total-leaves">
+                <h3>Total Leaves: <span id="total-leaves"></span></h3>
+            </div>
+            <a class="back-btn" href="/leave_mgmt/dashboard">Back to Dashboard</a>
+        </div>
+    </main>
+
+    <script src="/leave_mgmt/tabClient.js"></script>
+</body>
 </html>

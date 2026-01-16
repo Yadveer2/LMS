@@ -1,3 +1,7 @@
 node_modules
 .env
 .vscode
+DFD_Diagrams.md
+ER_Diagrams.md
+Workflow_Diagram.md
+color-theme.txt

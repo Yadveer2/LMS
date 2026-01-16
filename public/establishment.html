@@ -833,13 +833,13 @@
             <li class="nav-item">
                 <a href="#" class="nav-link active" data-section="structure">
                     <i class="fas fa-sitemap nav-icon"></i>
-                    <span class="nav-text">Structure Management</span>
+                    <span class="nav-text">Faculty & Staff Mgmt</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="#" class="nav-link" data-section="personnel">
                     <i class="fas fa-users nav-icon"></i>
-                    <span class="nav-text">Personnel Management</span>
+                    <span class="nav-text">Department & Hostel Mgmt</span>
                 </a>
             </li>
         </ul>
@@ -1193,12 +1193,14 @@
                     </div>
                     <div class="form-group">
                         <label for="updateDesignation">Designation</label>
-                        <input type="text" id="updateDesignation" class="form-control" required>
+                        <select id="updateDesignation" class="form-control" required>
+                            <option value="" disabled selected>Select Designation</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label for="updateDepartment">Department</label>
+                        <label for="updateDepartment" id="updateDepartmentLabel">Department</label>
                         <select id="updateDepartment" class="form-control">
-                            <option value="">Select Department</option>
+                            <option value="">Select Department/Hostel</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -1439,6 +1441,25 @@
             });
         });
     </script>
-    <script src="/leave_mgmt/establishment.js"></script>
+        <!-- Centered input modal used to replace prompt() -->
+        <div class="modal" id="inputPromptModal" style="display:none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="inputPromptTitle">Input</h3>
+                    <button class="close-modal" id="inputPromptClose">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label id="inputPromptLabel">Value</label>
+                        <input type="text" id="inputPromptValue" class="form-control" />
+                    </div>
+                </div>
+                <div style="padding:12px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid #eee;">
+                    <button class="btn" id="inputPromptCancel" style="border:1px solid #ccc;background:#fff;">Cancel</button>
+                    <button class="btn btn-primary" id="inputPromptOk">OK</button>
+                </div>
+            </div>
+        </div>
+        <script src="/leave_mgmt/establishment.js"></script>
 </body>
 </html>

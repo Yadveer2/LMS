@@ -71,7 +71,8 @@ CREATE TABLE users (
   hostel_id int(11) DEFAULT NULL,
   role enum('department_admin','department_staff','hostel_admin','hostel_staff','establishment_admin','principal_admin','superadmin') DEFAULT 'department_staff',
   status enum('active','inactive') DEFAULT 'active',
-  created_at timestamp NULL DEFAULT current_timestamp()
+  created_at timestamp NULL DEFAULT current_timestamp(),
+  current_session_id varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 INSERT INTO users (id, username, password, department_id, hostel_id, role, status, created_at) VALUES
 (1, 'admin', '0192023a7bbd73250516f069df18b500', 1, NULL, 'department_admin', 'active', '2025-11-27 15:23:22'),

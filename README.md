@@ -1,179 +1,90 @@
-# Faculty Leave Management System
-
-## Table of Contents
-- [Overview](#overview)
-- [Features](#features)
-- [Technologies Used](#technologies-used)
-- [System Requirements](#system-requirements)
-- [Installation Guide](#installation-guide)
-- [Configuration](#configuration)
-- [Database Schema](#database-schema)
-- [Usage](#usage)
-- [Deployment](#deployment)
-- [Security Considerations](#security-considerations)
-
----
+# Leave Management System
 
 ## Overview
-The **Faculty Leave Management System** is a web-based application designed to manage faculty leaves efficiently. It allows authorized user to add faculties, add leaves, view their leave details, and track total leave balances. The system features a secure login mechanism and is designed to be deployed on a server using Nginx.
+This repository implements a Faculty Leave Management web application built with Node.js and Express, backed by MySQL. The project provides a browser-based UI (files under `public/`) for managing faculties and leave records, server routes for API and PDF generation, and helper services for authentication and validation.
 
----
+## Project layout
+- `server.js` — application entry point
+- `routes/` — Express routes (e.g., `routes/pdf.js`)
+- `controllers/` — controller utilities (includes `generatePdf.js`)
+- `public/` — client-side pages and assets (HTML, JS, CSS)
+- `services/` — auth/validation helpers (`authz.js`, `leaveValidation.js`, `helpers.js`)
+- `schema.sql` — database schema and sample tables
+- `package.json` — project metadata and scripts
 
-## Features
-- **User Authentication:**
-  - Secure password hashing
-  - Session-based authentication
-  - Restricted access until login
-  
-- **Leave Management:**
-  - Authorized user can make entry for different types of leaves for different faculties
-  - Leaves stored in a dedicated table for detailed tracking
-  - Short leaves count as 1/3 of casual leave, and 3 short leaves are converted to 1 casual leave
+Files you will likely edit during development:
+- `public/*.html`, `public/*.js`, `public/*.css` — UI pages and client scripts
+- `routes/*.js` — add or change API endpoints
+- `controllers/*.js` — server-side business logic (PDF generation, data aggregation)
+- `services/*.js` — authorization and validation utilities
 
-- **Designation Management:**
-  - Faculty name and designation input via dropdown with predefined values
-  
-- **Detailed Leave Tracking:**
-  - Leave details (category & date) are stored separately and displayed dynamically
-  - API endpoint to fetch leave details
+## Key features
+- Session-based authentication and authorization hooks
+- Add and track different leave types per faculty
+- Detailed per-day leave records and summary balances
+- PDF generation endpoint (uses `controllers/generatePdf.js`)
 
-- **User Interface:**
-  - Dashboard after login at `/leave_mgmt/dashboard`
-  - Details page displaying faculty leave data
-  
----
+Behavioral notes:
+- Short leaves are tracked separately and converted to casual leave according to business rules implemented in the server logic (see `services/` and controller code).
 
-## Technologies Used
-- **Frontend:** HTML, CSS, JavaScript
-- **Backend:** Node.js (Express.js framework)
-- **Database:** MySQL
-- **Web Server:** Nginx
+## Prerequisites
+- Node.js (14+ recommended)
+- MySQL server
 
----
+## Quickstart
+1. Install dependencies:
 
-## System Requirements
-- Server
-- Node.js (v14 or higher)
-- MySQL (v8 or higher)
-- Nginx (latest stable version)
-
----
-
-## Installation Guide
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/your-repo/faculty-leave-management.git
-cd leave-mgmt
-```
-
-### 2. Install dependencies
 ```bash
 npm install
 ```
 
-### 3. Configure the database
-Create a MySQL database and import the provided schema.
+2. Create a MySQL database and import the schema:
 
 ```sql
 CREATE DATABASE leave_management;
 USE leave_management;
-
--- Import the schema from the provided SQL file
-SOURCE /path/to/schema.sql;
+-- from project root
+SOURCE schema.sql;
 ```
 
-### 4. Update environment variables
-Create a `.env` file in the root directory and configure it:
+3. Create a `.env` file in the project root with database and session settings (example):
 
 ```env
 DB_HOST=localhost
-DB_USER=db_user
-DB_PASSWORD=your_password
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
 DB_NAME=leave_management
-SESSION_SECRET=your_secret_key
+SESSION_SECRET=your_session_secret
+PORT=3300
 ```
 
-### 5. Start the server
+4. Start the server:
+
 ```bash
 node server.js
 ```
 
-The server should now be running at `http://localhost:3300/leave_mgmt`.
+5. Open the UI in your browser at `http://localhost:3300/` (or `http://localhost:<PORT>/` if changed).
 
----
+If your `package.json` defines a start script you can run `npm start` instead of `node server.js`.
 
-## Configuration
+## PDF generation
+The project exposes a PDF route handled by `routes/pdf.js` and `controllers/generatePdf.js`. Use the corresponding UI or request the route directly to generate PDF reports of leave records.
 
-### Nginx Setup
-To deploy the application using Nginx, add the following configuration to `/etc/nginx/sites-available/leave_mgmt`:
+## Development notes
+- Client pages live in `public/` (examples: `leaveDetails.html`, `main.html`, `principal.html`).
+- Server routes are defined under `routes/` and use services from `services/` for auth and validation.
+- To add new pages, place them in `public/` and wire any new API endpoints in `routes/`.
 
-```nginx
-server {
-    listen 80;
-    server_name yourdomain.com;
-
-    location /leave_mgmt/ {
-        proxy_pass http://localhost:3300/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
-
-Enable the configuration and restart Nginx:
-```bash
-sudo ln -s /etc/nginx/sites-available/leave_mgmt /etc/nginx/sites-enabled/
-sudo systemctl restart nginx
-```
-
----
-
-## Database Schema
-
-### Faculty Table
-```sql
-CREATE TABLE faculty (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    designation VARCHAR(100) NOT NULL,
-    total_leaves INT DEFAULT 0
-);
-```
-
-### Leave Details Table
-```sql
-CREATE TABLE leaves (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    faculty_id INT,
-    leave_category VARCHAR(50),
-    leave_date DATE,
-    FOREIGN KEY (faculty_id) REFERENCES faculty(id)
-);
-```
-
----
-
-## Usage
-
-### 1. Login to the system
-Visit `http://localhost:3300/leave_mgmt` and log in with your credentials.
-
-### 2. Navigate to the dashboard
-After successful login, you will be redirected to `/leave_mgmt/dashboard`.
-
-### 3. View leave details
-Click on the 'Details' button to open a new tab displaying leave details in a table format.
-
----
+Common files to inspect when troubleshooting:
+- `server.js` — server startup, middleware, and route registration
+- `routes/pdf.js` — PDF route handlers
+- `controllers/generatePdf.js` — PDF generation logic and templates
+- `services/authz.js` — authentication/authorization middleware
+- `schema.sql` — create tables and initial data
 
 ## Deployment
-To deploy on a Linux server:
-
-1. Install Node.js, MySQL, and Nginx.
-2. Clone the project and configure `.env` file.
-3. Set up Nginx reverse proxy.
-4. Use `pm2` for process management:
+- In production, run behind a reverse proxy (Nginx) and use a process manager like `pm2`:
 
 ```bash
 npm install -g pm2
@@ -182,20 +93,56 @@ pm2 save
 pm2 startup
 ```
 
+## Security
+- Use strong credentials for the DB and `SESSION_SECRET`.
+- Run the app over HTTPS in production.
+- Limit DB access to trusted hosts.
+
+Additional recommendations:
+- Rotate the `SESSION_SECRET` and store secrets outside the repository (e.g. environment variables, secret manager).
+- Sanitize and validate user input on both client and server. The project includes `services/leaveValidation.js` for server-side validation.
+
+## Where to look next
+- API routes: `routes/`
+- PDF logic: `controllers/generatePdf.js`
+- Client UI: `public/`
+
+## Database schema (example)
+Below are minimal table samples that fit the app's structure. Confirm and adapt to `schema.sql` in the repo:
+
+```sql
+CREATE TABLE faculty (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(255) NOT NULL,
+	designation VARCHAR(100) NOT NULL,
+	total_leaves INT DEFAULT 0
+);
+
+CREATE TABLE leaves (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	faculty_id INT NOT NULL,
+	leave_category VARCHAR(50) NOT NULL,
+	leave_date DATE NOT NULL,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (faculty_id) REFERENCES faculty(id)
+);
+```
+
+If the real `schema.sql` contains additional tables (users, roles, sessions), import that file instead.
+
 ---
 
-## Security Considerations
-- Ensure strong passwords for MySQL and web login.
-- Use HTTPS in production.
-- Regularly back up the database.
-- Restrict MySQL access to authorized IPs only.
+Maintainers:
+- Project Owner: YADVEER
+- Project Owner: PRABNOOR SINGH
+
+
+
 
 ---
 
----
+If you want, I can:
+- run the server locally and confirm it serves the `public/` pages,
+- open `routes/` to extract exact endpoints to list in the README,
+- or create a brief `CONTRIBUTING.md` with dev setup steps.
 
-**Maintainers:**
-- Project Owner: Pawan Kumar [pawankumarpk3610@gmail.com](mailto:pawankumarpk3610@gmail.com)
-- Contributors :
-  1. Ankur Paul [ankurpaul27@proton.me](mailto:ankurpaul27@proton.me)
-  2. Arsh [arshanand0527@gmail.com](mailto:arshanand0527@gmail.com)

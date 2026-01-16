@@ -171,7 +171,7 @@ app.use("/leave_mgmt", express.static(path.join(__dirname, "public"), {
   }
 }));
 
-const authenticateSession = (req, res, next) => {
+const authenticateSession = async (req, res, next) => {
   // First check if session exists
   if (!req.session) {
     return res.status(401).json({ error: 'No session found. Please log in.' });
@@ -185,6 +185,18 @@ const authenticateSession = (req, res, next) => {
   // Try to get tab-specific user first (preferred)
   if (req.session.tabs[req.tabId]) {
     req.session.user = req.session.tabs[req.tabId];
+    // Validate single-session
+    try {
+      const [rows] = await pool.query('SELECT current_session_id FROM users WHERE id = ?', [req.session.user.id]);
+      const dbSessionId = rows && rows[0] ? rows[0].current_session_id : null;
+      if (dbSessionId && dbSessionId !== req.sessionID) {
+        // Session invalidated by another login
+        req.session.destroy(() => {});
+        return res.status(401).json({ error: 'Your session was invalidated. Please log in again.' });
+      }
+    } catch (err) {
+      console.error('Session validation error', err);
+    }
     return next();
   }
 
@@ -193,6 +205,18 @@ const authenticateSession = (req, res, next) => {
   if (req.session.user) {
     // Store it in tabs so future requests use it
     req.session.tabs[req.tabId] = req.session.user;
+
+    try {
+      const [rows] = await pool.query('SELECT current_session_id FROM users WHERE id = ?', [req.session.user.id]);
+      const dbSessionId = rows && rows[0] ? rows[0].current_session_id : null;
+      if (dbSessionId && dbSessionId !== req.sessionID) {
+        req.session.destroy(() => {});
+        return res.status(401).json({ error: 'Your session was invalidated. Please log in again.' });
+      }
+    } catch (err) {
+      console.error('Session validation error', err);
+    }
+
     return next();
   }
 
@@ -398,7 +422,6 @@ app.post('/leave_mgmt/login', async (req, res) => {
           console.error('Session save error:', err);
           return res.status(500).json({ error: 'Session error' });
         }
-
         // Log successful login
         pool
           .query(
@@ -421,6 +444,38 @@ app.post('/leave_mgmt/login', async (req, res) => {
             ]
           )
           .catch((err) => console.error('Failed to log login', err));
+
+        // Single-session enforcement: destroy previous session (if any) and store current session id
+        (async () => {
+          try {
+            const currentSessionId = req.sessionID;
+            const [rows] = await pool.query('SELECT current_session_id FROM users WHERE id = ?', [user.id]);
+            const prevSessionId = rows && rows[0] ? rows[0].current_session_id : null;
+
+            if (prevSessionId && prevSessionId !== currentSessionId) {
+              sessionStore.destroy(prevSessionId, (err) => {
+                if (err) console.error('Failed to destroy previous session', err);
+                else {
+                  pool.query(
+                    `INSERT INTO activity_logs (actor_id, action, entity_type, entity_id, meta_json)
+                     VALUES (?, ?, ?, ?, ?)`,
+                    [
+                      user.id,
+                      'FORCED_LOGOUT',
+                      'session',
+                      prevSessionId,
+                      JSON.stringify({ reason: 'New login', ip_address: req.ip })
+                    ]
+                  ).catch(() => {});
+                }
+              });
+            }
+
+            await pool.query('UPDATE users SET current_session_id = ? WHERE id = ?', [currentSessionId, user.id]);
+          } catch (err) {
+            console.error('Failed to enforce single session', err);
+          }
+        })();
 
         res.json({
           message: 'Login successful',
@@ -471,10 +526,23 @@ app.post('/leave_mgmt/logout', (req, res) => {
 
   // If no tabs left, destroy session
   if (!req.session.tabs || Object.keys(req.session.tabs).length === 0) {
+    const sessionIdAtLogout = req.sessionID;
     req.session.destroy((err) => {
       if (err) {
         return res.status(500).json({ error: 'Logout failed' });
       }
+
+      // Clear recorded session id for user if it matches this session
+      (async () => {
+        try {
+          if (user && sessionIdAtLogout) {
+            await pool.query('UPDATE users SET current_session_id = NULL WHERE current_session_id = ?', [sessionIdAtLogout]);
+          }
+        } catch (e) {
+          console.error('Failed to clear current_session_id on logout', e);
+        }
+      })();
+
       res.clearCookie('leave_mgmt_sid', {
         path: '/',
         httpOnly: true,
