@@ -21,7 +21,7 @@ const {
 } = require('./services/authz');
 require('dotenv').config();
 
-const port = process.env.PORT || 3300;
+const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(cookieParser());
 
